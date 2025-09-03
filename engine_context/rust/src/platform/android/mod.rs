@@ -69,7 +69,7 @@ impl PlatformContext {
         env.call_static_method(
             class,
             "registerDestroyListener",
-            "(Ldev/irondash/engine_context/Notifier;)V",
+            "(Lcom/sidlcorp/engine_context/Notifier;)V",
             &[notifier.as_obj().into()],
         )?;
         self.destroy_notifier = Some(notifier);
@@ -85,7 +85,7 @@ impl PlatformContext {
             "loadClass",
             "(Ljava/lang/String;)Ljava/lang/Class;",
             &[
-                (&env.new_string("dev/irondash/engine_context/IrondashEngineContextPlugin")?)
+                (&env.new_string("com/sidlcorp/engine_context/SidlEngineContextPlugin")?)
                     .into(),
             ],
         );

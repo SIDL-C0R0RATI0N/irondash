@@ -1,4 +1,4 @@
-#import "EngineContextPlugin.h"
+#import "SidlEngineContextPlugin.h"
 
 #import <objc/message.h>
 
@@ -9,23 +9,23 @@
 @property(readwrite, nonatomic) FlutterEngine *flutterEngine;
 @end
 
-@interface _IrondashEngineContext : NSObject {
+@interface _SidlEngineContext : NSObject {
 @public
   __weak FlutterEngine *engine;
 }
 
 @end
 
-@implementation _IrondashEngineContext
+@implementation _SidlEngineContext
 
 @end
 
-@interface IrondashEngineContextPlugin () {
+@interface SidlEngineContextPlugin () {
   int64_t engineHandle;
 }
 @end
 
-@interface _IrondashAssociatedObject : NSObject {
+@interface _SidlAssociatedObject : NSObject {
   int64_t engineHandle;
 }
 
@@ -33,12 +33,12 @@
 
 @end
 
-@implementation IrondashEngineContextPlugin
+@implementation SidlEngineContextPlugin
 
 typedef void (^EngineDestroyedHandler)(int64_t);
 typedef void (*EngineDestroyedCallback)(int64_t);
 
-static NSMutableDictionary<NSNumber *, _IrondashEngineContext *> *registry;
+static NSMutableDictionary<NSNumber *, _SidlEngineContext *> *registry;
 static int64_t nextHandle = 1;
 static NSMutableArray<EngineDestroyedHandler> *engineDestroyedHandlers;
 
@@ -52,26 +52,26 @@ static char associatedObjectKey;
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
   int64_t engineHandle = nextHandle++;
 
-  IrondashEngineContextPlugin *instance =
-      [[IrondashEngineContextPlugin alloc] init];
+  SidlEngineContextPlugin *instance =
+      [[SidlEngineContextPlugin alloc] init];
   instance->engineHandle = engineHandle;
 
-  _IrondashEngineContext *context = [_IrondashEngineContext new];
+  _SidlEngineContext *context = [_SidlEngineContext new];
   context->engine = ((_FlutterPluginRegistrar *)registrar).flutterEngine;
   // There is no unregister callback on macOS, which means we'll leak
-  // an _IrondashEngineContext instance for every engine. Fortunately the
+  // an _SidlEngineContext instance for every engine. Fortunately the
   // instance is tiny and only uses weak pointers to reference engine artifacts.
   [registry setObject:context forKey:@(instance->engineHandle)];
 
   // There is no destroy notification on macOS, so track the lifecycle of
   // BinaryMessenger.
-  _IrondashAssociatedObject *object =
-      [[_IrondashAssociatedObject alloc] initWithEngineHandle:engineHandle];
+  _SidlAssociatedObject *object =
+      [[_SidlAssociatedObject alloc] initWithEngineHandle:engineHandle];
   objc_setAssociatedObject(context->engine, &associatedObjectKey, object,
                            OBJC_ASSOCIATION_RETAIN);
 
   FlutterMethodChannel *channel =
-      [FlutterMethodChannel methodChannelWithName:@"dev.irondash.engine_context"
+      [FlutterMethodChannel methodChannelWithName:@"com.sidlcorp.engine_context"
                                   binaryMessenger:[registrar messenger]];
   [registrar addMethodCallDelegate:instance channel:channel];
 }
@@ -86,17 +86,17 @@ static char associatedObjectKey;
 }
 
 + (UIView *)getFlutterView:(int64_t)engineHandle {
-  _IrondashEngineContext *context = [registry objectForKey:@(engineHandle)];
+  _SidlEngineContext *context = [registry objectForKey:@(engineHandle)];
   return context->engine.viewController.view;
 }
 
 + (id<FlutterTextureRegistry>)getTextureRegistry:(int64_t)engineHandle {
-  _IrondashEngineContext *context = [registry objectForKey:@(engineHandle)];
+  _SidlEngineContext *context = [registry objectForKey:@(engineHandle)];
   return context->engine;
 }
 
 + (id<FlutterBinaryMessenger>)getBinaryMessenger:(int64_t)engineHandle {
-  _IrondashEngineContext *context = [registry objectForKey:@(engineHandle)];
+  _SidlEngineContext *context = [registry objectForKey:@(engineHandle)];
   return context->engine.binaryMessenger;
 }
 
@@ -108,7 +108,7 @@ static char associatedObjectKey;
 
 @end
 
-@implementation _IrondashAssociatedObject
+@implementation _SidlAssociatedObject
 
 - (instancetype)initWithEngineHandle:(int64_t)engineHandle {
   if (self = [super init]) {
