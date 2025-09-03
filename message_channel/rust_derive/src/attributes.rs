@@ -1,4 +1,4 @@
-use proc_macro2::{Ident, Span};
+'''use proc_macro2::{Ident, Span};
 use proc_macro_error::{Diagnostic, Level};
 use syn::{spanned::Spanned, Attribute, Lit, Meta, NestedMeta, Path};
 
@@ -15,6 +15,7 @@ pub const SKIP_IF_EMPTY: Symbol = Symbol("skip_if_empty");
 pub const DEFAULT: Symbol = Symbol("default");
 pub const TAG: Symbol = Symbol("tag");
 pub const CONTENT: Symbol = Symbol("content");
+pub const FALLBACK: Symbol = Symbol("fallback");
 
 impl PartialEq<Symbol> for Ident {
     fn eq(&self, word: &Symbol) -> bool {
@@ -80,6 +81,7 @@ pub struct EnumVariantAttribute {
     pub rename: Option<StringWithSpan>, // rename of this variant
     pub rename_all: RenameRule,         // rename all for fields
     pub skip: bool,
+    pub fallback: bool,
 }
 
 #[derive(Debug, Default)]
@@ -178,6 +180,8 @@ pub fn parse_enum_variant_attributes(attrs: &[Attribute]) -> EnumVariantAttribut
             Meta::Path(path) => {
                 if path == SKIP {
                     res.skip = true;
+                } else if path == FALLBACK {
+                    res.fallback = true;
                 } else {
                     Diagnostic::spanned(path.span(), Level::Error, "unknown attribute".into())
                         .emit();
@@ -187,6 +191,14 @@ pub fn parse_enum_variant_attributes(attrs: &[Attribute]) -> EnumVariantAttribut
                 Diagnostic::spanned(m.span(), Level::Error, "unknown attribute".into()).emit();
             }
         }
+    }
+    if res.skip && res.fallback {
+        Diagnostic::spanned(
+            meta[0].span(),
+            Level::Error,
+            "fallback attribute can not be used together with skip".into(),
+        )
+        .abort();
     }
     res
 }
@@ -243,3 +255,4 @@ pub fn parse_field_attributes(attrs: &[Attribute]) -> FieldAttributes {
     }
     res
 }
+''

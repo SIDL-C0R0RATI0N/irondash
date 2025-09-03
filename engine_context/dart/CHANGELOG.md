@@ -1,3 +1,7 @@
+## 0.5.6
+
+- FEAT: add support for the maximum page size of 16 KB for Android
+
 ## 0.5.5
 
 - Update cargokit

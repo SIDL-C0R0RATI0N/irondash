@@ -3,7 +3,9 @@
    <application
         android:label="example"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:largeHeap="true">
+        <property android:name="android.supported_16k_page_size" android:value="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

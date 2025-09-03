@@ -26,9 +26,10 @@ android {
         namespace 'dev.irondash.engine_context'
     }
 
-    compileSdkVersion 31
+    compileSdkVersion 34
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -36,6 +37,10 @@ android {
     defaultConfig {
         minSdkVersion 16
     }
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
 }
 
 apply from: "../cargokit/gradle/plugin.gradle"
